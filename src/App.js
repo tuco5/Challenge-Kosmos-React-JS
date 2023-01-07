@@ -34,18 +34,6 @@ const App = () => {
   };
 
   const handleResizeStart = (index, e) => {
-    console.log('>>> event', e);
-    // Check if the resize is coming from the left handle
-    const [handlePosX, handlePosY] = e.lastEvent.direction;
-    // 0 => center
-    // -1 => top or left
-    // 1 => bottom or right
-
-    // -1, -1
-    // -1, 0
-    // -1, 1
-
-    console.log('width', moveableComponents, e);
     // Save the initial left and width values of the moveable component
     const initialLeft = e.left;
 
