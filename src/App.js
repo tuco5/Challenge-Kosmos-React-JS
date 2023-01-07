@@ -24,7 +24,6 @@ const App = () => {
   };
 
   const updateMoveable = (id, newComponent, updateEnd = false) => {
-    console.log(newComponent);
     const updatedMoveables = moveableComponents.map((moveable, i) => {
       if (moveable.id === id) {
         return { id, ...newComponent, updateEnd };
@@ -35,9 +34,9 @@ const App = () => {
   };
 
   const handleResizeStart = (index, e) => {
-    console.log('e', e.direction);
+    console.log('>>> event', e);
     // Check if the resize is coming from the left handle
-    const [handlePosX, handlePosY] = e.direction;
+    const [handlePosX, handlePosY] = e.lastEvent.direction;
     // 0 => center
     // -1 => top or left
     // 1 => bottom or right
@@ -45,14 +44,13 @@ const App = () => {
     // -1, -1
     // -1, 0
     // -1, 1
-    if (handlePosX === -1) {
-      console.log('width', moveableComponents, e);
-      // Save the initial left and width values of the moveable component
-      const initialLeft = e.left;
-      const initialWidth = e.width;
 
-      // Set up the onResize event handler to update the left value based on the change in width
-    }
+    console.log('width', moveableComponents, e);
+    // Save the initial left and width values of the moveable component
+    const initialLeft = e.left;
+
+    // Set up the onResize event handler to update the left value based on the change in width
+    updateMoveable(index, { left: initialLeft }, true);
   };
 
   return (
@@ -77,7 +75,8 @@ const App = () => {
 
 export default App;
 
-const Component = ({ updateMoveable, top, left, width, height, index, color, id, setSelected, isSelected = false, updateEnd }) => {
+const Component = ({ updateMoveable, top, left, width, height, index, color, id, setSelected, isSelected = false, updateEnd, handleResizeStart }) => {
+  console.log('>>> update end', updateEnd);
   const ref = useRef();
 
   const [nodoReferencia, setNodoReferencia] = useState({
@@ -92,6 +91,7 @@ const Component = ({ updateMoveable, top, left, width, height, index, color, id,
 
   let parent = document.getElementById('parent');
   let parentBounds = parent?.getBoundingClientRect();
+  console.log('>>> parent bounds: ', parentBounds);
 
   const onResize = async (e) => {
     // ACTUALIZAR ALTO Y ANCHO
@@ -160,6 +160,27 @@ const Component = ({ updateMoveable, top, left, width, height, index, color, id,
       },
       true
     );
+
+    handleResizeStart(index, e);
+  };
+
+  const onDrag = (e) => {
+    console.log('>>> Drag event: ', e);
+    // let newTop = e.top;
+    // let newBot = e.bottom;
+    // let newLeft = e.left;
+    // let newRight = e.right;
+
+    // if (newTop < parentBounds?.top) newTop = 0;
+    // if (newBot < 0) newBot = 0;
+
+    updateMoveable(id, {
+      top: e.top,
+      left: e.left,
+      width,
+      height,
+      color,
+    });
   };
 
   return (
@@ -183,15 +204,7 @@ const Component = ({ updateMoveable, top, left, width, height, index, color, id,
         target={isSelected && ref.current}
         resizable
         draggable
-        onDrag={(e) => {
-          updateMoveable(id, {
-            top: e.top,
-            left: e.left,
-            width,
-            height,
-            color,
-          });
-        }}
+        onDrag={onDrag}
         onResize={onResize}
         onResizeEnd={onResizeEnd}
         keepRatio={false}
